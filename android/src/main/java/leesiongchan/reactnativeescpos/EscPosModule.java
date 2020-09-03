@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Base64;
 
 import androidx.annotation.RequiresPermission;
 
@@ -40,7 +39,6 @@ public class EscPosModule extends ReactContextBaseJavaModule {
     public static final String BLUETOOTH_CONNECTED = "BLUETOOTH_CONNECTED";
     public static final String BLUETOOTH_DISCONNECTED = "BLUETOOTH_DISCONNECTED";
     public static final String BLUETOOTH_DEVICE_FOUND = "BLUETOOTH_DEVICE_FOUND";
-    public static final byte[] CHARCODE_PC864  = {0x1b,0x74,0x1c};
     private final ReactApplicationContext reactContext;
     private PrinterService printerService;
     private ReadableMap config;
@@ -163,7 +161,6 @@ public class EscPosModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void write(byte[] command, Promise promise) {
-        printerService.write(CHARCODE_PC864);
         printerService.write(command);
         promise.resolve(true);
     }

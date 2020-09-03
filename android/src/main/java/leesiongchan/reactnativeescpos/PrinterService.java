@@ -28,7 +28,6 @@ public class PrinterService {
     public static final int PRINTING_WIDTH_58_MM = 384;
     public static final int PRINTING_WIDTH_76_MM = 450;
     public static final int PRINTING_WIDTH_80_MM = 576;
-    public static final byte[] CHARCODE_PC864  = {0x1b,0x74,0x1c};
     private static final String CARRIAGE_RETURN = System.getProperty("line.separator");
     private LayoutBuilder layoutBuilder = new LayoutBuilder();
     private final int DEFAULT_QR_CODE_SIZE = 200;
@@ -56,7 +55,7 @@ public class PrinterService {
     }
 
     public void print(String text) throws UnsupportedEncodingException {
-        write(text.getBytes("Cp864"));
+        write(text.getBytes("GBK"));
     }
 
     public void printLn(String text) throws UnsupportedEncodingException {
@@ -129,7 +128,6 @@ public class PrinterService {
     }
 
     public void write(byte[] command) {
-        basePrinterService.write(CHARCODE_PC864);
         basePrinterService.write(command);
     }
 
