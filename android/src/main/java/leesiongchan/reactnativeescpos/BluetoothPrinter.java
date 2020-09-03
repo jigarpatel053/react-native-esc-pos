@@ -1,6 +1,5 @@
 package leesiongchan.reactnativeescpos;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -25,7 +24,7 @@ public class BluetoothPrinter implements Printer {
 
     public void open() throws IOException {
         BluetoothDevice device = adapter.getRemoteDevice(address);
-        @SuppressLint("MissingPermission") BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
+        BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
         socket.connect();
         printer = socket.getOutputStream();
     }
