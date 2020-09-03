@@ -2,16 +2,12 @@ package leesiongchan.reactnativeescpos;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageDecoder;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
-
-import com.facebook.react.bridge.ReactApplicationContext;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import io.github.escposjava.print.Commands.*;
 import io.github.escposjava.print.Printer;
 import io.github.escposjava.print.exceptions.BarcodeSizeError;
 import io.github.escposjava.print.exceptions.QRCodeException;
@@ -22,20 +18,21 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import leesiongchan.reactnativeescpos.helpers.EscPosHelper;
 import leesiongchan.reactnativeescpos.utils.BitMatrixUtils;
+
+
+
+
+
 import static io.github.escposjava.print.Commands.*;
 
 public class PrinterService {
     public static final int PRINTING_WIDTH_58_MM = 384;
-    public static final int PRINTING_WIDTH_76_MM = 450;
     public static final int PRINTING_WIDTH_80_MM = 576;
     private static final String CARRIAGE_RETURN = System.getProperty("line.separator");
     private LayoutBuilder layoutBuilder = new LayoutBuilder();
     private final int DEFAULT_QR_CODE_SIZE = 200;
-    private final int DEFAULT_IMG_MAX_HEIGHT = 200;
-    private final int DEFAULT_IMG_WIDTH_OFFSET = 100;
     private int printingWidth = PRINTING_WIDTH_58_MM;
     private io.github.escposjava.PrinterService basePrinterService;
-    private ReactApplicationContext context;
 
     public PrinterService(Printer printer) throws IOException {
         basePrinterService = new io.github.escposjava.PrinterService(printer);
@@ -78,22 +75,21 @@ public class PrinterService {
 
     public void printSample() throws IOException {
         String design =
-                "               ABC Inc. {C}               " + "\n" +
-                        "           1234 Main Street {C}           " + "\n" +
-                        "        Anytown, US 12345-6789 {C}        " + "\n" +
-                        "            (555) 123-4567 {C}            " + "\n" +
-                        "                                          " + "\n" +
-                        "          D0004 | Table #: A1 {C}         " + "\n" +
-                        "------------------------------------------" + "\n" +
-                        "Item            {<>}    Qty  Price  Amount" + "\n" +
-                        "Chicken Rice    {<>}      2  12.50   25.00" + "\n" +
-                        "Coke Zero       {<>}      5   3.00   15.00" + "\n" +
-                        "Fries           {<>}      3   3.00    9.00" + "\n" +
-                        "Fresh Oyster    {<>}      1   8.00    8.00" + "\n" +
-                        "Lobster Roll    {<>}      1  16.50   16.50" + "\n" +
-                        "------------------------------------------" + "\n" +
-                        "       {QR[Where are the aliens?]}        " + "\n" +
-                        "       {IMG[file://]}                     " + "\n";
+            "               ABC Inc. {C}               " + "\n" +
+            "           1234 Main Street {C}           " + "\n" +
+            "        Anytown, US 12345-6789 {C}        " + "\n" +
+            "            (555) 123-4567 {C}            " + "\n" +
+            "                                          " + "\n" +
+            "          D0004 | Table #: A1 {C}         " + "\n" +
+            "------------------------------------------" + "\n" +
+            "Item            {<>}    Qty  Price  Amount" + "\n" +
+            "Chicken Rice    {<>}      2  12.50   25.00" + "\n" +
+            "Coke Zero       {<>}      5   3.00   15.00" + "\n" +
+            "Fries           {<>}      3   3.00    9.00" + "\n" +
+            "Fresh Oyster    {<>}      1   8.00    8.00" + "\n" +
+            "Lobster Roll    {<>}      1  16.50   16.50" + "\n" +
+            "------------------------------------------" + "\n" +
+            "       {QR[Where are the aliens?]}        " + "\n";
 
         printDesign(design);
     }
@@ -103,21 +99,14 @@ public class PrinterService {
         write(baos.toByteArray());
     }
 
-    public Bitmap readImage(String filePath, ReactApplicationContext reactContext) throws IOException {
-        Uri fileUri = Uri.parse(filePath);
-        Bitmap image = null;
-        BitmapFactory.Options op = new BitmapFactory.Options();
-        op.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        image = BitmapFactory.decodeFile(fileUri.getPath(), op);
-        return image;
-    }
-
     public void printImage(String filePath) throws IOException {
-        printImage(readImage(filePath, context));
+        Uri fileUri = Uri.parse(filePath);
+        Bitmap image = BitmapFactory.decodeFile(fileUri.getPath());
+        printImage(image);
     }
 
     public void printImage(Bitmap image) throws IOException {
-        image = EscPosHelper.resizeImage(image, printingWidth - DEFAULT_IMG_WIDTH_OFFSET, DEFAULT_IMG_MAX_HEIGHT);
+        image = EscPosHelper.resizeImage(image, printingWidth);
         ByteArrayOutputStream baos = generateImageByteArrayOutputStream(image);
         write(baos.toByteArray());
     }
@@ -194,23 +183,14 @@ public class PrinterService {
         String line;
 
         while ((line = reader.readLine()) != null) {
-            byte[] qtToWrite = null;
-            byte[] imageToWrite = null;
-            if (line.matches(".*\\{QR\\[(.+)\\]\\}.*")) {
+            if (line.matches("\\{QR\\[(.+)\\]\\}")) {
                 try {
-                    qtToWrite = generateQRCodeByteArrayOutputStream(line.replaceAll(".*\\{QR\\[(.+)\\]\\}.*", "$1"),
-                            DEFAULT_QR_CODE_SIZE).toByteArray();
+                    baos.write(generateQRCodeByteArrayOutputStream(line.replaceAll("\\{QR\\[(.+)\\]\\}", "$1"),
+                            DEFAULT_QR_CODE_SIZE).toByteArray());
                 } catch (QRCodeException e) {
                     throw new IOException(e);
                 }
-            }
-
-            if (line.matches(".*\\{IMG\\[(.+)\\]\\}.*")) {
-                try {
-                    imageToWrite = generateImageByteArrayOutputStream(EscPosHelper.resizeImage(readImage(line.replaceAll(".*\\{IMG\\[(.+)\\]\\}.*", "$1"),context), printingWidth - DEFAULT_IMG_WIDTH_OFFSET, DEFAULT_IMG_MAX_HEIGHT)).toByteArray();
-                } catch (IOException e) {
-                    throw new IOException(e);
-                }
+                continue;
             }
 
             boolean bold = line.contains("{B}");
@@ -281,15 +261,7 @@ public class PrinterService {
             }
 
             try {
-                if (qtToWrite != null) {
-                    baos.write(qtToWrite);
-                }
-                if (imageToWrite != null) {
-                    baos.write(imageToWrite);
-                }
-                if (qtToWrite == null && imageToWrite == null) {
-                    baos.write(layoutBuilder.createFromDesign(line, charsOnLine).getBytes("GBK"));
-                }
+                baos.write(layoutBuilder.createFromDesign(line, charsOnLine).getBytes("GBK"));
             } catch (UnsupportedEncodingException e) {
                 // Do nothing?
             }
@@ -343,9 +315,5 @@ public class PrinterService {
             // Unsupported format
             throw new QRCodeException("QRCode generation error", e);
         }
-    }
-
-    public void setContext(ReactApplicationContext reactContext) {
-        this.context = reactContext;
     }
 }
