@@ -288,7 +288,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
 
     result = [eposPrinter addImage:resizeImage x:0 y:0
                         width:resizeImage.size.width
-                       height:resizeImage.size.height
+                       height:resizeImage.size.height / 2
                         color:EPOS2_COLOR_1
                          mode:EPOS2_MODE_MONO
                      halftone:EPOS2_HALFTONE_DITHER
@@ -334,7 +334,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
         imageWidth = imageWidth * ratio;
     }
 
-    [image drawInRect:CGRectMake(maxWidth / 2 - imageWidth / 2, maxHeight / 2 - imageHeight / 2, imageWidth, imageHeight)];
+    [image drawInRect:CGRectMake(0, 0, imageWidth, imageHeight)];
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 
