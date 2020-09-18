@@ -288,7 +288,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
 
     result = [eposPrinter addImage:resizeImage x:0 y:0
                         width:resizeImage.size.width
-                       height:resizeImage.size.height / 2
+                       height:resizeImage.size.height
                         color:EPOS2_COLOR_1
                          mode:EPOS2_MODE_MONO
                      halftone:EPOS2_HALFTONE_DITHER
