@@ -116,6 +116,7 @@ RCT_EXPORT_METHOD(setPrintingSize:(NSString *)printingSize resolver:(RCTPromiseR
     NSLog(@"printingSize--%@",printingSize);
     @try{
         int result = EPOS2_SUCCESS;
+        printerPaperWidth = printingSize;
 
         NSMutableDictionary *dictSettings = [[NSMutableDictionary alloc]init];
         if([printingSize isEqualToString:_PRINTING_SIZE_58_MM]) {
@@ -141,8 +142,8 @@ RCT_EXPORT_METHOD(setPrintingSize:(NSString *)printingSize resolver:(RCTPromiseR
     }
 }
 
-RCT_EXPORT_METHOD(getPrintingSize){
-    
+RCT_EXPORT_METHOD(getPrintingSize:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject){
+  resolve (printerPaperWidth);
 }
 
 RCT_EXPORT_METHOD(setTextDensity:(int)textDensity resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
