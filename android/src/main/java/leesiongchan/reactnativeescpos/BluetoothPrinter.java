@@ -9,6 +9,7 @@ import io.github.escposjava.print.Printer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+import android.util.Log;
 
 public class BluetoothPrinter implements Printer {
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
@@ -24,8 +25,29 @@ public class BluetoothPrinter implements Printer {
 
     public void open() throws IOException {
         BluetoothDevice device = adapter.getRemoteDevice(address);
-        BluetoothSocket socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-        socket.connect();
+        BluetoothSocket socket = null;
+
+        try {
+            socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
+        } catch (Exception e) {Log.e("","Error creating socket");}
+
+        try {
+            socket.connect();
+            Log.e("","Connected");
+        } catch (IOException e) {
+            Log.e("",e.getMessage());
+            try {
+                Log.e("","trying fallback...");
+
+                socket =(BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+                socket.connect();
+
+                Log.e("","Connected");
+            }
+         catch (Exception e2) {
+             Log.e("", "Couldn't establish Bluetooth connection!");
+          }
+        }
         printer = socket.getOutputStream();
     }
 
