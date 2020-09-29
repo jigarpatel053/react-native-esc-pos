@@ -133,6 +133,14 @@ public class PrinterService {
         basePrinterService.close();
     }
 
+    public void kickCashDrawerPin2(){
+        basePrinterService.write(CD_KICK_2);
+    }
+
+    public void kickCashDrawerPin5(){
+        basePrinterService.write(CD_KICK_5);
+    }
+    
     /**
      * DESIGN 1: Order List                       *
      *          D0004 | Table #: A1 {C} {H1}      *
