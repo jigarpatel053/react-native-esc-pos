@@ -1,13 +1,5 @@
 #import <React/RCTBridgeModule.h>
-#import <React/RCTConvert.h>
 
-
-
-@interface EscPos : NSObject <RCTBridgeModule>{
-
-}
-
-
-
+@interface EscPos : NSObject <RCTBridgeModule>
 
 @end
